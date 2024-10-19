@@ -1,0 +1,324 @@
+:root {
+  --primary-color: #34495e;  /* Dark blue-gray */
+  --secondary-color: #3498db;  /* Bright blue */
+  --text-color: #2c3e50;  /* Dark gray-blue */
+  --background-color: #ecf0f1;  /* Light gray */
+  --input-border-color: #bdc3c7;  /* Light gray */
+  --input-background: #ffffff;  /* White */
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+.wp-list-table {
+    margin-top: 20px;
+}
+
+.wp-list-table th,
+.wp-list-table td {
+    padding: 12px;
+}
+
+.wp-list-table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+}
+
+.wp-list-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.wp-list-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.wp-list-table tfoot th {
+    text-align: right;
+}
+
+input[type="number"] {
+    width: 80px;
+}
+
+.stocktaking-footer {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f1f1f1;
+    text-align: right;
+}
+
+.stocktaking-footer button {
+    margin-left: 10px;
+}
+
+.stocktake-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#stocktake-form {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: var(--secondary-color);
+    border-radius: 6px;
+}
+
+#stocktake-form input[type="text"],
+#stocktake-form input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--input-border-color);
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#stocktake-table {
+    display: none;
+}
+
+.stocktake-info {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+table.stocktake-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--input-border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+table.stocktake-table th,
+table.stocktake-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--input-border-color);
+}
+
+table.stocktake-table th {
+    background-color: var(--secondary-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+table.stocktake-table tr:last-child td {
+    border-bottom: none;
+}
+
+.count-input {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid var(--input-border-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.button-container {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.button-container button {
+    margin-left: 15px;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button-container button:hover {
+    background-color: #3a7bc8;
+}
+
+#close-stocktake {
+    background-color: #e74c3c;
+}
+
+#close-stocktake:hover {
+    background-color: #c0392b;
+}
+
+@media (max-width: 768px) {
+    .stocktake-container {
+        padding: 20px;
+    }
+
+    table.stocktake-table {
+        font-size: 14px;
+    }
+
+    .button-container {
+        flex-direction: column;
+    }
+
+    .button-container button {
+        margin: 10px 0 0 0;
+        width: 100%;
+    }
+}
+
+.notice {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-left: 4px solid #000;
+}
+
+.notice-error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.notice-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.stocktake-form-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--input-background);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.stocktake-form-container h1 {
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--input-border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    color: var(--text-color);
+    background-color: var(--input-background);
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    padding-left: 70px;
+    line-height: 34px;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.slider {
+    background-color: var(--input-border-color);
+}
+
+input:checked + .slider {
+    background-color: var(--secondary-color);
+}
+
+#product-categories {
+    height: 150px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+}
+
+.button-primary {
+    background-color: var(--secondary-color);
+    color: var(--input-background);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 600;
+}
+
+.button-primary:hover {
+    background-color: var(--primary-color);
+}
+
+.audit-section {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.audit-section-title {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.audit-table th,
+.audit-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.audit-table th {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
+
+.audit-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.update-audit-button {
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.update-audit-button:hover {
+background-color: var(--secondary-color);
+}

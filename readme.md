@@ -1,60 +1,70 @@
-# Superwp WooCommerce Stocktaking
+# superWP Woo Stocktake
 
-## Overview
+A comprehensive stocktaking system for WooCommerce with count transfer, reset functionality, and detailed reporting.
 
-Superwp WooCommerce Stocktaking is a WordPress plugin designed to facilitate stocktaking processes for WooCommerce products. It allows users with appropriate permissions to manage stock counts, view variances, and update stock levels easily through a user-friendly interface.
+## Description
 
-## Features
+superWP Woo Stocktake is a powerful inventory management solution for WooCommerce stores. It provides a robust set of tools for conducting accurate stocktakes, managing discrepancies, and generating detailed reports.
 
-- View stock on hand (SOH) and count stock (CO) for each product.
-- Calculate variance (CO - SOH) to identify discrepancies.
-- Filter products and search functionality for easy navigation.
-- Save and update stock counts efficiently.
-- Download stock data as CSV for further analysis.
-- Customizable display fields and access roles.
+### Key Features
+
+- Conduct stocktakes with ease
+- Transfer counted stock to WooCommerce
+- Reset functionality for new stocktakes
+- Detailed discrepancy analysis
+- Audit and follow-up system
+- Comprehensive reporting
 
 ## Installation
 
-1. Download the plugin ZIP file from [GitHub](https://github.com/Thiararapeter/SuperWP-WooCommerce-Stocktaking).
-2. Extract the ZIP file and upload the `superwp-woocommerce-stocktaking` folder to the `wp-content/plugins/` directory of your WordPress installation.
-3. Activate the plugin through the 'Plugins' menu in WordPress.
-4. Configure access roles and display fields in the plugin settings.
+1. Upload the plugin files to the `/wp-content/plugins/superwp-woo-stocktake` directory, or install the plugin through the WordPress plugins screen directly.
+2. Activate the plugin through the 'Plugins' screen in WordPress.
+3. Use the WooCommerce -> Stocktaking menu to access the plugin's features.
 
 ## Usage
 
-1. Access the 'Stocktaking' menu item in the WordPress admin panel.
-2. Navigate through products, view current stock, and input counted stock.
-3. Save or update stock counts as necessary.
-4. Download stock data for further analysis if needed.
+1. Initiate a stocktake from the WooCommerce -> Stocktaking menu.
+2. Count your inventory using the provided interface.
+3. Review discrepancies in the generated report.
+4. Conduct audits and follow-ups on discrepancies.
+5. Generate detailed reports for analysis.
+6. Transfer final counts to WooCommerce to update stock levels.
 
-## Screenshots
+## Features in Detail
 
-### Stocktaking Page
+1. **Stocktake Initiation**: Start a new stocktake process with a single click.
+2. **Counting Interface**: User-friendly interface for entering counted stock quantities.
+3. **Discrepancy Analysis**: Automatically calculates and highlights discrepancies.
+4. **Audit System**: Allows for follow-up actions on discrepancies.
+5. **Reporting**: Generates comprehensive reports on stocktake results.
+6. **Stock Transfer**: Option to update WooCommerce stock levels with counted quantities.
+7. **Reset Functionality**: Reset counted stock for new stocktakes.
+8. **Data Visualization**: Presents stocktake data in an easy-to-understand format.
 
-![Stocktaking Page](screenshots/stocktaking-page.png)
+## Requirements
 
-### Stocktaking Settings
-
-![Stocktaking Settings](screenshots/stocktaking-settings.png)
-
-## Hooks and Actions
-
-### Actions
-
-- `SUPERWPWOO/plugin_loaded`: Fired after the plugin is successfully loaded.
-
-### Filters
-
-- `wc_stocktaking_access_roles`: Modify the roles that can access the stocktaking dashboard.
+- WordPress 5.0 or higher
+- WooCommerce 3.0 or higher
+- PHP 7.2 or higher
 
 ## Support
 
-For support, feature requests, or bug reports, please open an issue on [GitHub](https://github.com/Thiararapeter/SuperWP-WooCommerce-Stocktaking/issues).
+For support queries, feature requests, and bug reports, please [open an issue](https://github.com/Thiararapeter/SuperWP-WooCommerce-Stocktaking/issues) on this repository.
 
-## Contributions
+## Contributing
 
-Contributions are welcome! If you'd like to contribute to the plugin, please fork the repository and submit a pull request.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This plugin is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
+This project is licensed under the GPL-2.0+ License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+[Thiarara Peter](https://profiles.wordpress.org/thiarara/)
+
+## Changelog
+
+### 1.0.01
+- Initial release
+

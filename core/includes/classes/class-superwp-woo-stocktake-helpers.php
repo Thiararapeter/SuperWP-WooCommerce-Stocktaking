@@ -4,17 +4,17 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Class Superwp_Woocommerce_Stocktaking_Helpers
+ * Class Superwp_Woo_Stocktake_Helpers
  *
  * This class contains repetitive functions that
  * are used globally within the plugin.
  *
- * @package		SUPERWPWOO
- * @subpackage	Classes/Superwp_Woocommerce_Stocktaking_Helpers
- * @author		thiarara
- * @since		0.9.9
+ * @package		SUPERWPSTOCKTAKE
+ * @subpackage	Classes/Superwp_Woo_Stocktake_Helpers
+ * @author		Thiarara SuperWP
+ * @since		1.0.01
  */
-class Superwp_Woocommerce_Stocktaking_Helpers{
+class Superwp_Woo_Stocktake_Helpers{
 
 	/**
 	 * ######################

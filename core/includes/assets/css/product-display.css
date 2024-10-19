@@ -1,0 +1,21 @@
+.wp-list-table {
+    margin-top: 20px;
+}
+
+.wp-list-table th,
+.wp-list-table td {
+    padding: 12px;
+}
+
+.wp-list-table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+}
+
+.wp-list-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.wp-list-table tr:hover {
+    background-color: #f5f5f5;
+}

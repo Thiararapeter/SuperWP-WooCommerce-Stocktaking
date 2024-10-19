@@ -7,7 +7,7 @@ Tags: woocommerce, inventory, stock management, stocktaking, audit
 Requires at least: 5.0
 Tested up to: 6.2
 Requires PHP: 7.2
-Stable tag: 1.0.01
+Stable tag: 1.0.02
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,11 @@ Discrepancies are clearly highlighted in the stocktake report. You can review ea
 5. Comprehensive stocktake report
 
 == Changelog ==
+
+= 1.0.02 =
+* Added "Open To Audit" functionality for improved audit workflow
+* Updated UI for better user experience in audit process
+* Fixed a bug where audit status wasn't updating correctly in some cases
 
 = 1.0.01 =
 * Initial release

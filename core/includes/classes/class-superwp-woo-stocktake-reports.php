@@ -132,12 +132,14 @@ if (!class_exists('Superwp_Woo_Stocktake_Reports')) :
             }
 
             $stocktake_date = get_post_meta($stocktake_id, '_stocktake_date', true);
-            $sku_count_with_discrepancies = get_post_meta($stocktake_id, '_sku_count_with_discrepancies', true);
-            $total_value = get_post_meta($stocktake_id, '_total_value', true);
             $status = get_post_meta($stocktake_id, '_stocktake_status', true);
             $discrepancies = get_post_meta($stocktake_id, '_stock_discrepancies', true);
-            $total_counted = get_post_meta($stocktake_id, '_total_counted', true);
-            $total_expected = get_post_meta($stocktake_id, '_total_expected', true); // Assuming this meta key exists
+
+            // Fetch the audit status
+            $audit_status = get_post_meta($stocktake_id, '_audit_status', true);
+            if (empty($audit_status)) {
+                $audit_status = 'Not Started'; // Default status if not set
+            }
 
             $total_expected = 0;
             $total_counted = 0;
@@ -156,82 +158,82 @@ if (!class_exists('Superwp_Woo_Stocktake_Reports')) :
                 }
             }
 
-            update_post_meta($stocktake_id, '_total_expected', $total_expected);
-            update_post_meta($stocktake_id, '_total_counted', $total_counted);
-            update_post_meta($stocktake_id, '_total_value', $total_value);
-            update_post_meta($stocktake_id, '_sku_count_with_discrepancies', $sku_count_with_discrepancies);
-
             ?>
             <div class="wrap stocktake-report-wrap">
                 <div class="stocktake-report-header">
                     <h1 class="stocktake-report-title">Stocktake Report: <?php echo esc_html($stocktake->post_title); ?></h1>
                     <div class="stocktake-report-meta">
-                        <span>Date: <?php echo esc_html($stocktake_date); ?></span> | 
-                        <span>Status: <?php echo esc_html($status); ?></span>
+                        <span><strong>Date:</strong> <?php echo esc_html($stocktake_date); ?></span>
+                        <span><strong>Stocktake Status:</strong> <?php echo esc_html($status); ?></span>
+                        <span><strong>Audit Status:</strong> <?php echo esc_html($audit_status); ?></span>
                     </div>
                 </div>
 
+                <div class="stocktake-report-menu">
+                    <ul>
+                        <li><a href="#summary" class="active">Summary</a></li>
+                        <li><a href="#discrepancies">Discrepancies</a></li>
+                    </ul>
+                </div>
+
                 <div class="stocktake-report-content">
-                    <!-- Stocktake Details Section -->
-                    <div class="stocktake-details">
-                        <h2>Stocktake Details</h2>
-                        <div class="stocktake-details-grid">
-                            <div class="detail-card">
+                    <div id="summary" class="stocktake-report-summary">
+                        <h2>Summary</h2>
+                        <div class="summary-grid">
+                            <div class="summary-card">
                                 <h3>Total Expected</h3>
-                                <p class="detail-value"><?php echo esc_html(get_post_meta($stocktake_id, '_total_expected', true)); ?></p>
+                                <p><?php echo esc_html($total_expected); ?></p>
                             </div>
-                            <div class="detail-card">
+                            <div class="summary-card">
                                 <h3>Total Counted</h3>
-                                <p class="detail-value"><?php echo esc_html(get_post_meta($stocktake_id, '_total_counted', true)); ?></p>
+                                <p><?php echo esc_html($total_counted); ?></p>
                             </div>
-                            <div class="detail-card">
+                            <div class="summary-card">
                                 <h3>Total Value</h3>
-                                <p class="detail-value"><?php echo wc_price(get_post_meta($stocktake_id, '_total_value', true)); ?></p>
+                                <p><?php echo wc_price($total_value); ?></p>
                             </div>
-                            <div class="detail-card">
+                            <div class="summary-card">
                                 <h3>SKUs with Discrepancies</h3>
-                                <p class="detail-value"><?php echo esc_html(get_post_meta($stocktake_id, '_sku_count_with_discrepancies', true)); ?></p>
+                                <p><?php echo esc_html($sku_count_with_discrepancies); ?></p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Additional Sections -->
-                    <div class="stocktake-report-section report">
-                        <?php $this->display_discrepancy_details($discrepancies); ?>
-                        <?php $this->display_products_with_discrepancies($discrepancies); ?>
-                    </div>
-
-                    <div class="stocktake-report-section audit">
-                        <?php $this->display_audit_section($stocktake_id); ?>
-                    </div>
-
-                    <!-- Move Discrepancy Analysis to the end -->
-                    <div class="stocktake-report-section discrepancy-analysis">
-                        <h2>Discrepancy Analysis</h2>
-                        <div class="stocktake-report-summary">
-                            <div class="summary-card">
-                                <h3>Total Discrepancy</h3>
-                                <p><?php echo esc_html($this->calculate_total_discrepancy($discrepancies)); ?></p>
-                            </div>
-                            <div class="summary-card">
-                                <h3>Positive Discrepancies</h3>
-                                <p><?php echo esc_html($this->count_positive_discrepancies($discrepancies)); ?></p>
-                            </div>
-                            <div class="summary-card">
-                                <h3>Negative Discrepancies</h3>
-                                <p><?php echo esc_html($this->count_negative_discrepancies($discrepancies)); ?></p>
-                            </div>
-                        </div>
-                        <h3>Reasons for Discrepancies</h3>
-                        <p>To be Explained in Audit</p>
+                    <div id="discrepancies" class="stocktake-report-discrepancies">
+                        <h2>Discrepancies</h2>
+                        <table class="widefat striped">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Expected</th>
+                                    <th>Counted</th>
+                                    <th>Discrepancy</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($discrepancies as $product_id => $data) : 
+                                    $product = wc_get_product($product_id);
+                                    if (!$product) continue;
+                                    ?>
+                                    <tr>
+                                        <td><?php echo esc_html($product->get_name()); ?></td>
+                                        <td><?php echo esc_html($product->get_sku()); ?></td>
+                                        <td><?php echo esc_html($data['expected']); ?></td>
+                                        <td><?php echo esc_html($data['counted']); ?></td>
+                                        <td><?php echo esc_html($data['discrepancy']); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
                 <div class="stocktake-report-actions">
-                    <a href="<?php echo admin_url('admin.php?page=wc-stocktaking-reports'); ?>" class="button">Back to Reports</a>
-                    <?php if ($status === 'Open') : ?>
-                        <a href="<?php echo admin_url('admin.php?page=wc-stocktaking-close&stocktake_id=' . $stocktake_id); ?>" class="button button-primary">Close Stocktake</a>
-                    <?php endif; ?>
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=wc-stocktaking-reports')); ?>" class="button">Back to Reports</a>
+                    <button id="print-report" class="button">Print Report</button>
+                    <button id="export-csv" class="button">Export to CSV</button>
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=wc-stocktaking-audit&stocktake_id=' . $stocktake_id)); ?>" class="button button-primary">Go to Audit</a>
                 </div>
             </div>
             <?php
@@ -492,21 +494,20 @@ if (!class_exists('Superwp_Woo_Stocktake_Reports')) :
                 return;
             }
             ?>
-            <table class="stocktake-report-table">
+            <table class="wp-list-table widefat fixed striped stocktake-report-table">
                 <thead>
                     <tr>
                         <th>Product</th>
                         <th>SKU</th>
-                        <th>Expected</th>
-                        <th>Counted</th>
+                        <th>Expected Stock</th>
+                        <th>Counted Stock</th>
                         <th>Discrepancy</th>
                         <th>Variance Type</th>
                         <th>Initial Reason</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
-                    foreach ($discrepancies as $product_id => $data) : 
+                    <?php foreach ($discrepancies as $product_id => $data) :
                         $product = wc_get_product($product_id);
                         if (!$product) continue;
                         $variance_type = $data['discrepancy'] > 0 ? 'Positive Variance' : ($data['discrepancy'] < 0 ? 'Negative Variance' : 'No Variance');
@@ -564,3 +565,14 @@ if (!class_exists('Superwp_Woo_Stocktake_Reports')) :
     }
 
 endif;
+
+function enqueue_stocktake_report_scripts() {
+    wp_enqueue_script(
+        'stocktake-report-scripts',
+        plugin_dir_url(__FILE__) . 'includes/assets/js/stocktake-audit-report.js',
+        array('jquery'),
+        SUPERWPSTOCKTAKE_VERSION,
+        true
+    );
+}
+add_action('admin_enqueue_scripts', 'enqueue_stocktake_report_scripts');

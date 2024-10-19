@@ -65,6 +65,9 @@ This project is licensed under the GPL-2.0+ License - see the [LICENSE](LICENSE)
 
 ## Changelog
 
+### 1.0.02
+- Added "Open To Audit" functionality for improved audit workflow
+- Updated UI for better user experience in audit process
+
 ### 1.0.01
 - Initial release
-

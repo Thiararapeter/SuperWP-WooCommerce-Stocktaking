@@ -38,18 +38,35 @@ jQuery(document).ready(function($) {
     });
 
     // Print report
-    $('#print-report').on('click', function() {
+    $('#print-report').on('click', function(e) {
+        e.preventDefault();
         window.print();
     });
 
     // Export to CSV
-    $('#export-csv').on('click', function() {
-        var table = $('.stocktake-report-table').DataTable();
-        var csv = table.data().toArray().map(function(row) {
-            return row.join(',');
-        }).join('\n');
+    $('#export-csv').on('click', function(e) {
+        e.preventDefault();
+        var table = $('.stocktake-report-discrepancies table');
+        var csv = [];
         
-        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        // Add headers
+        var headers = [];
+        table.find('thead th').each(function() {
+            headers.push('"' + $(this).text().trim() + '"');
+        });
+        csv.push(headers.join(','));
+        
+        // Add rows
+        table.find('tbody tr').each(function() {
+            var row = [];
+            $(this).find('td').each(function() {
+                row.push('"' + $(this).text().trim().replace(/"/g, '""') + '"');
+            });
+            csv.push(row.join(','));
+        });
+        
+        var csvContent = csv.join('\n');
+        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         var link = document.createElement("a");
         if (link.download !== undefined) {
             var url = URL.createObjectURL(blob);

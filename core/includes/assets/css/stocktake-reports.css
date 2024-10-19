@@ -3,140 +3,117 @@
 :root {
     --primary-color: #2271b1;
     --secondary-color: #135e96;
-    --report-bg: #f0f6fc;
-    --audit-bg: #f6f7f7;
-    --success-color: #00a32a;
-    --error-color: #d63638;
-    --text-color: #1d2327;
-    --light-text: #50575e;
+    --background-color: #f0f0f1;
+    --header-color: #ffffff;
+    --footer-color: #e5e5e5;
+    --text-color: #3c434a;
+    --border-color: #c3c4c7;
+    --menu-background: #1d2327;
 }
 
 body.stocktake-report-page {
-    background-color: #f0f0f1;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 .stocktake-report-wrap {
     max-width: 1200px;
-    margin: 20px auto;
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.13);
-    border-radius: 5px;
+    margin: 40px auto;
+    background-color: #fff;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 4px;
     overflow: hidden;
 }
 
 .stocktake-report-header {
-    background-color: var(--primary-color);
-    color: #fff;
-    padding: 20px;
+    background-color: var(--header-color);
+    padding: 30px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .stocktake-report-title {
-    font-size: 24px;
+    color: var(--primary-color);
     margin: 0;
+    padding: 0;
+    font-size: 24px;
+    line-height: 1.3;
 }
 
 .stocktake-report-meta {
-    margin-top: 10px;
-    font-size: 14px;
-    opacity: 0.8;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.stocktake-report-meta span {
+    background-color: #f0f0f1;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 13px;
 }
 
 .stocktake-report-content {
-    padding: 20px;
+    padding: 30px;
 }
 
-.stocktake-report-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+.stocktake-report-summary,
+.stocktake-report-discrepancies {
+    margin-bottom: 40px;
 }
 
-.summary-card {
-    background: #fff;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-.summary-card h3 {
-    margin: 0 0 10px;
-    font-size: 16px;
-    color: var(--light-text);
-}
-
-.summary-card p {
-    margin: 0;
-    font-size: 24px;
-    font-weight: bold;
-    color: var(--primary-color);
-}
-
-.stocktake-report-section {
-    margin-bottom: 30px;
-    padding: 20px;
-    border-radius: 5px;
-}
-
-.stocktake-report-section h2 {
-    margin-top: 0;
-    color: var(--text-color);
-    border-bottom: 2px solid var(--primary-color);
+.stocktake-report-summary h2,
+.stocktake-report-discrepancies h2 {
+    color: var(--secondary-color);
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 10px;
-}
-
-.stocktake-report-section.report {
-    background-color: var(--report-bg);
-}
-
-.stocktake-report-section.audit {
-    background-color: var(--audit-bg);
-}
-
-.stocktake-report-table {
-    width: 100%;
-    border-collapse: collapse;
     margin-bottom: 20px;
+    font-size: 20px;
 }
 
-.stocktake-report-table th,
-.stocktake-report-table td {
-    padding: 12px;
+.stocktake-report-summary table,
+.stocktake-report-discrepancies table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stocktake-report-summary th,
+.stocktake-report-summary td,
+.stocktake-report-discrepancies th,
+.stocktake-report-discrepancies td {
+    padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.stocktake-report-table th {
+.stocktake-report-summary th,
+.stocktake-report-discrepancies th {
     background-color: var(--secondary-color);
     color: #fff;
+    font-weight: 600;
 }
 
-.stocktake-report-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.discrepancy-positive {
-    color: var(--success-color);
-}
-
-.discrepancy-negative {
-    color: var(--error-color);
+.stocktake-report-summary tr:last-child td,
+.stocktake-report-discrepancies tr:last-child td {
+    border-bottom: none;
 }
 
 .stocktake-report-actions {
-    background-color: #f8f9fa;
-    padding: 20px;
+    background-color: var(--footer-color);
+    padding: 20px 30px;
     text-align: right;
-    border-top: 1px solid #e5e5e5;
+    border-top: 1px solid var(--border-color);
 }
 
 .stocktake-report-actions .button {
     margin-left: 10px;
-    padding: 8px 16px;
-    font-size: 14px;
+    padding: 5px 15px;
+    height: auto;
     line-height: 2;
-    min-height: 40px;
 }
 
 .stocktake-report-actions .button-primary {
@@ -150,13 +127,32 @@ body.stocktake-report-page {
     border-color: var(--secondary-color);
 }
 
+.page-title-action {
+    margin-left: 15px;
+    top: -3px;
+    position: relative;
+    padding: 4px 12px;
+    font-size: 14px;
+}
+
 @media screen and (max-width: 782px) {
-    .stocktake-report-summary {
-        grid-template-columns: 1fr;
+    .stocktake-report-wrap {
+        margin: 20px 10px;
     }
 
-    .stocktake-report-table {
-        font-size: 14px;
+    .stocktake-report-header,
+    .stocktake-report-content,
+    .stocktake-report-actions {
+        padding: 20px;
+    }
+
+    .stocktake-report-title {
+        font-size: 20px;
+    }
+
+    .stocktake-report-summary h2,
+    .stocktake-report-discrepancies h2 {
+        font-size: 18px;
     }
 
     .stocktake-report-actions {
@@ -164,131 +160,207 @@ body.stocktake-report-page {
     }
 
     .stocktake-report-actions .button {
+        margin: 5px;
         display: block;
         width: 100%;
-        margin: 10px 0 0 0;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
     }
 }
 
-/* Audit Section Styles */
-.audit-section {
-    background-color: var(--audit-bg);
-    border-radius: 8px;
-    padding: 20px;
-    margin-top: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+/* Print styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .stocktake-report-wrap,
+    .stocktake-report-wrap * {
+        visibility: visible;
+    }
+    .stocktake-report-wrap {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    .stocktake-report-actions,
+    .stocktake-report-menu {
+        display: none;
+    }
 }
 
-.audit-section h2 {
-    font-size: 24px;
-    margin-bottom: 15px;
-    color: var(--primary-color);
+.stocktake-report-summary {
+    margin-bottom: 40px;
 }
 
-.audit-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
-
-.audit-table th,
-.audit-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #e5e5e5;
-}
-
-.audit-table th {
-    background-color: var(--secondary-color);
-    color: #fff;
-}
-
-.audit-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-.audit-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.audit-table .discrepancy-positive {
-    color: var(--success-color);
-}
-
-.audit-table .discrepancy-negative {
-    color: var(--error-color);
-}
-
-.update-audit-button {
-    background-color: var(--primary-color);
-    color: #fff;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.update-audit-button:hover {
-    background-color: var(--secondary-color);
-}
-
-.stocktake-details {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 30px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.stocktake-details h2 {
-    color: #333;
-    font-size: 24px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #e0e0e0;
+.stocktake-report-summary h2 {
+    color: var(--secondary-color);
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 20px;
 }
 
-.stocktake-details-grid {
+.summary-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
+    margin-bottom: 30px;
 }
 
-.detail-card {
-    background-color: #ffffff;
-    border-radius: 6px;
-    padding: 15px;
-    text-align: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-    transition: transform 0.3s ease;
+/* Report menu styling */
+.stocktake-report-menu {
+    background-color: #1d2327;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    overflow: hidden;
 }
 
-.detail-card:hover {
-    transform: translateY(-5px);
+.stocktake-report-menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
 }
 
-.detail-card h3 {
-    color: #555;
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-.detail-value {
-    font-size: 24px;
-    font-weight: bold;
-    color: #2271b1;
+.stocktake-report-menu li {
     margin: 0;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .stocktake-details-grid {
-        grid-template-columns: 1fr 1fr;
+.stocktake-report-menu a {
+    color: #fff;
+    text-decoration: none;
+    padding: 12px 20px;
+    display: block;
+    transition: background-color 0.3s ease;
+}
+
+.stocktake-report-menu a:hover,
+.stocktake-report-menu a.active {
+    background-color: var(--primary-color);
+}
+
+/* Update summary card styles */
+.summary-card {
+    background-color: var(--menu-background);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.summary-card h3 {
+    color: #fff;
+    font-size: 16px;
+    margin: 0 0 10px 0;
+}
+
+.summary-card p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    margin: 0;
+}
+
+/* Menu styling */
+#adminmenuwrap {
+    background-color: var(--menu-background);
+    border-right: 1px solid var(--menu-border-color);
+}
+
+#adminmenu .wp-menu-name,
+#adminmenu .wp-submenu-head,
+#adminmenu a.menu-top {
+    color: #fff;
+}
+
+#adminmenu li.menu-top:hover,
+#adminmenu li.opensub > a.menu-top,
+#adminmenu li > a.menu-top:focus {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
+
+/* Bar styling */
+#wpadminbar {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+#wpadminbar .ab-item, 
+#wpadminbar a.ab-item, 
+#wpadminbar > #wp-toolbar span.ab-label, 
+#wpadminbar > #wp-toolbar span.noticon {
+    color: #fff;
+}
+
+#wpadminbar .ab-icon, 
+#wpadminbar .ab-icon:before, 
+#wpadminbar .ab-item:before, 
+#wpadminbar .ab-item:after {
+    color: #fff;
+}
+
+/* Audit report menu styling */
+#adminmenu li.toplevel_page_wc-stocktaking-reports .wp-menu-name,
+#adminmenu li.toplevel_page_wc-stocktaking-reports .wp-submenu-head,
+#adminmenu li.toplevel_page_wc-stocktaking-reports a.menu-top {
+    color: #fff;
+}
+
+#adminmenu li.toplevel_page_wc-stocktaking-reports:hover,
+#adminmenu li.toplevel_page_wc-stocktaking-reports.opensub > a.menu-top,
+#adminmenu li.toplevel_page_wc-stocktaking-reports > a.menu-top:focus {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
+
+@media screen and (max-width: 782px) {
+    .stocktake-report-menu ul {
+        flex-direction: column;
+    }
+
+    .stocktake-report-menu li {
+        margin-right: 0;
+        margin-bottom: 10px;
     }
 }
 
-@media (max-width: 480px) {
-    .stocktake-details-grid {
-        grid-template-columns: 1fr;
-    }
+/* ... (print styles remain the same) ... */
+
+/* Adjust the header styles */
+.stocktake-report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.stocktake-report-title {
+    margin: 0;
+    font-size: 23px;
+    font-weight: 400;
+    color: var(--text-color);
+}
+
+.stocktake-report-meta {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.stocktake-report-meta span {
+    background-color: #f0f0f1;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 13px;
 }

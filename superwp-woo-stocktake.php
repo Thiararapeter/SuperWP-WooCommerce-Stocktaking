@@ -11,7 +11,7 @@
  * Plugin Name:   superWP Woo Stocktake
  * Plugin URI:    https://github.com/Thiararapeter/SuperWP-WooCommerce-Stocktaking
  * Description:   A stocktaking system for WooCommerce with count transfer, reset functionality, and totals
- * Version:       1.0.01
+ * Version:       1.0.02
  * Author:        Thiarara SuperWP
  * Author URI:    https://profiles.wordpress.org/thiarara/
  * Text Domain:   superwp-woo-stocktake

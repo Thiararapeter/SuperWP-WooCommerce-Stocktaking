@@ -26,14 +26,20 @@ body.stocktake-audit-page {
 }
 
 .stocktake-audit-header {
-    background-color: var(--primary-color);
-    color: #fff;
-    padding: 20px;
+    background-color: #2271b1;
+    color: #ffffff;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.stocktake-audit-header,
+.stocktake-audit-header * {
+    color: #ffffff !important;
 }
 
 .stocktake-audit-title {
-    font-size: 24px;
-    margin: 0;
+    color: #ffffff;
+    margin-bottom: 10px;
 }
 
 .stocktake-audit-meta {
@@ -75,8 +81,7 @@ body.stocktake-audit-page {
 }
 
 .stocktake-audit-actions {
-    background-color: #f8f9fa;
-    padding: 20px;
+    margin-top: 20px;
     text-align: right;
     border-top: 1px solid var(--border-color);
 }
@@ -100,6 +105,15 @@ body.stocktake-audit-page {
     border-color: var(--secondary-color);
 }
 
+.stocktake-audit-meta span {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    display: inline-block;
+}
+
 @media screen and (max-width: 782px) {
     .stocktake-audit-table {
         font-size: 14px;
@@ -114,4 +128,22 @@ body.stocktake-audit-page {
         width: 100%;
         margin: 10px 0 0 0;
     }
+}
+
+.audit-closed input:disabled,
+.audit-closed select:disabled,
+.audit-closed textarea:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.audit-closed input[readonly],
+.audit-closed select[disabled] {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.audit-closed .stocktake-audit-table {
+    opacity: 0.8;
 }

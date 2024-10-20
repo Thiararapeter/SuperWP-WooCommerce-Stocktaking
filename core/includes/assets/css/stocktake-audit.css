@@ -147,3 +147,12 @@ body.stocktake-audit-page {
 .audit-closed .stocktake-audit-table {
     opacity: 0.8;
 }
+
+/* Add this to your CSS file */
+.pagination {
+    margin-top: 20px;
+}
+
+.pagination .button {
+    margin-right: 10px;
+}

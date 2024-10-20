@@ -322,3 +322,47 @@ input:checked + .slider {
 .update-audit-button:hover {
 background-color: var(--secondary-color);
 }
+
+.new-count:focus {
+    border-color: #007cba; /* Change to your desired color */
+    box-shadow: 0 0 5px rgba(0, 124, 186, 0.5); /* Optional shadow */
+    outline: none; /* Remove default outline */
+}
+
+.user-info {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+}
+
+.wrap h1 {
+    color: #007cba;
+}
+
+table.widefat {
+    margin-top: 20px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.widefat th, table.widefat td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+table.widefat th {
+    background-color: #f9f9f9;
+}
+
+.button-primary {
+    background-color: #007cba;
+    border-color: #007cba;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+.button-primary:hover {
+    background-color: #005a8c;
+    border-color: #005a8c;
+}

@@ -56,6 +56,11 @@ class Superwp_Woo_Stocktake_Audit {
 
         $can_manage_audit = current_user_can('manage_options'); // Adjust this capability as needed
 
+        if (empty($discrepancies)) {
+            echo '<p>No discrepancies found.</p>';
+            return; // Exit if there are no discrepancies
+        }
+
         ?>
         <div class="wrap stocktake-audit-wrap">
             <div class="stocktake-audit-header">
@@ -87,8 +92,10 @@ class Superwp_Woo_Stocktake_Audit {
                                 if (!$product) continue;
                                 $audit_data = get_post_meta($stocktake_id, "_audit_data_{$product_id}", true) ?: array();
                                 $variance_type = $data['discrepancy'] > 0 ? 'Positive Variance' : 'Negative Variance';
+                                $categories = wp_get_post_terms($product_id, 'product_cat', array('fields' => 'slugs'));
+                                $category_classes = implode(' ', array_map('sanitize_html_class', $categories));
                                 ?>
-                                <tr>
+                                <tr class="product-row <?php echo esc_attr($category_classes); ?>" data-product-name="<?php echo esc_attr(strtolower($product->get_name())); ?>">
                                     <td><?php echo esc_html($product->get_name()); ?></td>
                                     <td><?php echo esc_html($data['discrepancy']); ?></td>
                                     <td class="variance-type <?php echo esc_attr(strtolower(str_replace(' ', '-', $variance_type))); ?>">
@@ -329,4 +336,3 @@ class Superwp_Woo_Stocktake_Audit {
 }
 
 endif; // End if class_exists check.
-

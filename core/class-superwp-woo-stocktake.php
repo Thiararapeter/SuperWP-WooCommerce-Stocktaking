@@ -94,7 +94,7 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 				new Superwp_Woo_Stocktake_Audit();
 
 				//Fire the plugin logic
-				new Superwp_Woo_Stocktake_Run();
+				//new Superwp_Woo_Stocktake_Run();
 
 				/**
 				 * Fire a custom action to allow dependencies
@@ -151,6 +151,7 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 			add_action('wp_ajax_wc_stocktaking_update_count', array($this, 'wc_stocktaking_update_count'));
 			add_action('wp_ajax_wc_stocktaking_save_count', array($this, 'wc_stocktaking_save_count'));
 			add_action('wp_ajax_wc_stocktaking_search_products', array($this, 'wc_stocktaking_search_products'));
+			add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_scripts'));
 		}
 
 		// Add admin menu items
@@ -176,6 +177,16 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 
 		// Stocktaking page content
 		public function wc_stocktaking_page() {
+			// Add screen options
+			$screen = get_current_screen();
+			$screen->add_option('per_page', 20); // Default items per page
+
+			// Check if the user has set a custom value
+			$per_page = get_user_meta(get_current_user_id(), 'wc_stocktaking_per_page', true);
+			if ($per_page) {
+				$screen->set_option('per_page', $per_page);
+			}
+
 			$active_stocktake = $this->wc_stocktaking_get_active_stocktake();
 			if (!$active_stocktake) {
 				echo '<div class="wrap"><h1>WooCommerce Stocktaking</h1>';
@@ -221,6 +232,7 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 								<th>New Count</th>
 								<th>Counted</th>
 								<th>Counted Value</th>
+								<th>Last Update</th>
 							</tr>
 						</thead>
 						<tbody id="product-list">
@@ -251,10 +263,14 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 							foreach ($products as $product) :
 								$product_id = $product->get_id();
 								$current_stock = $product->get_stock_quantity();
-								$price = $product->get_price();
+								$price = $product->get_price(); // Use get_price() to fetch the price
 								$current_stock_value = $current_stock * $price;
 								$counted_stock = get_post_meta($product_id, '_counted_stock', true) ?: 0;
 								$counted_value = $counted_stock * $price;
+								$last_update_time = get_post_meta($product_id, '_last_update_time', true) ?: 'Never';
+
+								// Debug information
+								error_log("Product ID: " . $product_id . ", Name: " . $product->get_name() . ", Price: " . $price);
 
 								$total_current_stock += $current_stock;
 								$total_current_stock_value += $current_stock_value;
@@ -276,6 +292,9 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 									</td>
 									<td>
 										<span class="counted-value" id="counted_value_<?php echo esc_attr($product_id); ?>"><?php echo wc_price($counted_value); ?></span>
+									</td>
+									<td>
+										<span class="last-update-time" id="last_update_<?php echo esc_attr($product_id); ?>"><?php echo esc_html($last_update_time); ?></span>
 									</td>
 								</tr>
 							<?php endforeach; ?>
@@ -396,6 +415,8 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 				'nonce' => wp_create_nonce('wc_stocktaking_nonce')
 			));
 			wp_enqueue_script('wc-stocktake-audit-report', plugin_dir_url(__FILE__) . 'includes/assets/js/stocktake-audit-report.js', array('jquery'), '1.0', true);
+			wp_enqueue_script('datatables', 'https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js', array('jquery'), '1.10.21', true);
+			wp_enqueue_style('datatables-style', 'https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css');
 		}
 
 		// Modify the AJAX handler for updating count
@@ -404,36 +425,30 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 
 			$product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
 			$new_count = isset($_POST['new_count']) ? intval($_POST['new_count']) : 0;
-			$reason = isset($_POST['reason']) ? sanitize_text_field($_POST['reason']) : '';
 
-			$product = wc_get_product($product_id);
-			if (!$product) {
-				wp_send_json_error(array('message' => 'Invalid product.'));
+			if ($product_id <= 0) {
+				wp_send_json_error(array('message' => 'Invalid product ID'));
 				return;
 			}
 
-			$current_stock = $product->get_stock_quantity();
-			$discrepancy = $new_count - $current_stock;
-			$variance_type = $discrepancy > 0 ? 'Positive Variance' : ($discrepancy < 0 ? 'Negative Variance' : 'No Variance');
+			// Update the counted stock
+			update_post_meta($product_id, '_counted_stock', $new_count);
+			update_post_meta($product_id, '_last_update_time', current_time('mysql'));
 
-			$stocktake_id = get_option('current_stocktake_id');
-			$discrepancies = get_post_meta($stocktake_id, '_stock_discrepancies', true) ?: array();
+			// Get the product to calculate the price
+			$product = wc_get_product($product_id);
+			if (!$product) {
+				wp_send_json_error(array('message' => 'Failed to get product'));
+				return;
+			}
 
-			$discrepancies[$product_id] = array(
-				'expected' => $current_stock,
-				'counted' => $new_count,
-				'discrepancy' => $discrepancy,
-				'variance_type' => $variance_type,
-				'reason' => $reason
-			);
-
-			update_post_meta($stocktake_id, '_stock_discrepancies', $discrepancies);
+			$price = $product->get_price();
+			$total_count_value = wc_price($new_count * $price);
 
 			wp_send_json_success(array(
-				'message' => 'Count updated successfully.',
 				'new_count' => $new_count,
-				'discrepancy' => $discrepancy,
-				'variance_type' => $variance_type
+				'total_count_value' => $total_count_value,
+				'last_update_time' => current_time('mysql')
 			));
 		}
 
@@ -445,13 +460,25 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 			$stocktake_id = isset($_POST['stocktake_id']) ? intval($_POST['stocktake_id']) : 0;
 
 			if ($stocktake_id <= 0) {
-				wp_send_json_error(array('message' => 'Invalid stocktake ID'));
-				return;
+					wp_send_json_error(array('message' => 'Invalid stocktake ID'));
+					return;
 			}
 
-			$this->process_stocktake_data($stocktake_id, $new_counts);
+			$totalCounted = 0;
 
-			wp_send_json_success(array('message' => 'Count saved and processed successfully.'));
+			foreach ($new_counts as $product_id => $new_count) {
+					$product_id = intval($product_id);
+					$new_count = intval($new_count);
+
+					// Update the counted stock
+					update_post_meta($product_id, '_counted_stock', $new_count);
+					$totalCounted += $new_count;
+			}
+
+			wp_send_json_success(array(
+					'message' => 'Count saved successfully for ' . count($new_counts) . ' products.',
+					'total_counted' => $totalCounted
+			));
 		}
 
 		// Process stocktake data
@@ -528,38 +555,55 @@ if ( ! class_exists( 'Superwp_Woo_Stocktake' ) ) :
 
 			$products = wc_get_products($args);
 
-			ob_start();
-			foreach ($products as $product) :
+			$html = '';
+			foreach ($products as $product) {
 				$product_id = $product->get_id();
 				$current_stock = $product->get_stock_quantity();
-				$price = $product->get_price();
+				$price = wc_get_price_including_tax($product);
 				$current_stock_value = $current_stock * $price;
 				$counted_stock = get_post_meta($product_id, '_counted_stock', true) ?: 0;
 				$counted_value = $counted_stock * $price;
-				?>
-				<tr>
-					<td><?php echo esc_html($product->get_name()); ?></td>
-					<td><?php echo esc_html($product->get_sku()); ?></td>
-					<td class="current-stock"><?php echo esc_html($current_stock); ?></td>
-					<td class="current-stock-value"><?php echo wc_price($current_stock_value); ?></td>
-					<td>
-						<input type="number" class="new-count" name="new_count[<?php echo esc_attr($product_id); ?>]" 
-							   data-product-id="<?php echo esc_attr($product_id); ?>" 
-							   data-price="<?php echo esc_attr($price); ?>" value="0" min="0">
-					</td>
-					<td>
-						<span class="counted" id="counted_<?php echo esc_attr($product_id); ?>"><?php echo esc_html($counted_stock); ?></span>
-					</td>
-					<td>
-						<span class="counted-value" id="counted_value_<?php echo esc_attr($product_id); ?>"><?php echo wc_price($counted_value); ?></span>
-					</td>
-				</tr>
-			<?php
-			endforeach;
-			$html = ob_get_clean();
+
+				// Debug information
+				error_log("Product ID: " . $product_id . ", Name: " . $product->get_name() . ", Type: " . $product->get_type() . ", Price: " . $price);
+
+				$html .= '<tr>';
+				$html .= '<td>' . esc_html($product->get_name()) . '</td>';
+				$html .= '<td>' . esc_html($product->get_sku()) . '</td>';
+				$html .= '<td class="current-stock">' . esc_html($current_stock) . '</td>';
+				$html .= '<td class="current-stock-value">' . wc_price($current_stock_value) . '</td>';
+				$html .= '<td><input type="number" class="new-count" name="new_count[' . esc_attr($product_id) . ']" 
+						   data-product-id="' . esc_attr($product_id) . '" 
+						   data-price="' . esc_attr($price) . '" value="0" min="0"></td>';
+				$html .= '<td><span class="counted" id="counted_' . esc_attr($product_id) . '">' . esc_html($counted_stock) . '</span></td>';
+				$html .= '<td><span class="counted-value" id="counted_value_' . esc_attr($product_id) . '">' . wc_price($counted_value) . '</span></td>';
+				$html .= '</tr>';
+			}
 
 			wp_send_json_success(array('html' => $html));
 		}
+
+		// Add this method to the Superwp_Woo_Stocktake class
+
+		public function enqueue_frontend_scripts() {
+			wp_enqueue_script(
+				'superwp-woo-stocktake-frontend',
+				plugin_dir_url(__FILE__) . 'includes/assets/js/frontend-scripts.js',
+				array('jquery'),
+				SUPERWPSTOCKTAKE_VERSION,
+				true
+			);
+		}
 	}
 
+
+	function wc_stocktaking_save_screen_options() {
+		if (isset($_POST['per_page'])) {
+			update_user_meta(get_current_user_id(), 'wc_stocktaking_per_page', intval($_POST['per_page']));
+		}
+	}
+	add_action('load-toplevel_page_wc-stocktaking', 'wc_stocktaking_save_screen_options');
+	
 endif; // End if class_exists check.
+
+

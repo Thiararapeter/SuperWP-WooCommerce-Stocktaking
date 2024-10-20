@@ -69,8 +69,8 @@ if (!class_exists('Superwp_Woo_Stocktake_Reports')) :
                 <h1>Stocktaking Reports</h1>
                 
                 <?php if ($active_stocktake) : ?>
-                    <div class="notice notice-info">
-                        <p>There is an active stocktake: <a href="<?php echo admin_url('admin.php?page=wc-stocktaking&stocktake_id=' . $active_stocktake->ID); ?>"><?php echo esc_html($active_stocktake->post_title); ?></a></p>
+                    <div class="notice notice-info" style="font-weight: bold; background-color: #0073aa; padding: 10px; border-radius: 5px;">
+                        <p>There is an active stocktake: <a href="<?php echo admin_url('admin.php?page=wc-stocktaking&stocktake_id=' . $active_stocktake->ID); ?>" class="active-stocktake-link"><?php echo esc_html($active_stocktake->post_title); ?></a></p>
                     </div>
                 <?php endif; ?>
 
@@ -128,112 +128,106 @@ if (!class_exists('Superwp_Woo_Stocktake_Reports')) :
         private function single_report($stocktake_id) {
             $stocktake = get_post($stocktake_id);
             if (!$stocktake || $stocktake->post_type !== 'stocktake') {
-                wp_die('Invalid stocktake.');
+                ?>
+                <div style="color: blue; text-transform: uppercase; text-decoration: underline; font-weight: bold; background-color: #ff0000; padding: 10px; border-radius: 5px;">
+                    Invalid stocktake.
+                </div>
+                <?php
+                return; // Exit the function after displaying the error
             }
-
             $stocktake_date = get_post_meta($stocktake_id, '_stocktake_date', true);
+            $total_value = get_post_meta($stocktake_id, '_total_value', true);
             $status = get_post_meta($stocktake_id, '_stocktake_status', true);
-            $discrepancies = get_post_meta($stocktake_id, '_stock_discrepancies', true);
+            $discrepancies = get_post_meta($stocktake_id, '_stock_discrepancies', true) ?: array();
+            $total_counted = get_post_meta($stocktake_id, '_total_counted', true);
+            $total_expected = get_post_meta($stocktake_id, '_total_expected', true);
+            $audit_status = get_post_meta($stocktake_id, '_audit_status', true) ?: 'Not Started';
 
-            // Fetch the audit status
-            $audit_status = get_post_meta($stocktake_id, '_audit_status', true);
-            if (empty($audit_status)) {
-                $audit_status = 'Not Started'; // Default status if not set
-            }
-
-            $total_expected = 0;
-            $total_counted = 0;
-            $total_value = 0;
-            $sku_count_with_discrepancies = 0;
+            // Calculate new metrics
+            $total_expected_value = 0;
+            $total_counted_value = 0;
+            $total_products = count($discrepancies);
+            $products_with_discrepancies = 0;
 
             foreach ($discrepancies as $product_id => $data) {
-                $total_expected += $data['expected'];
-                $total_counted += $data['counted'];
                 $product = wc_get_product($product_id);
                 if ($product) {
-                    $total_value += $product->get_price() * $data['counted'];
-                }
-                if ($data['discrepancy'] != 0) {
-                    $sku_count_with_discrepancies++;
+                    $price = $product->get_price();
+                    $total_expected_value += $data['expected'] * $price;
+                    $total_counted_value += $data['counted'] * $price;
+                    if ($data['discrepancy'] != 0) {
+                        $products_with_discrepancies++;
+                    }
                 }
             }
 
             ?>
             <div class="wrap stocktake-report-wrap">
                 <div class="stocktake-report-header">
-                    <h1 class="stocktake-report-title">Stocktake Report: <?php echo esc_html($stocktake->post_title); ?></h1>
+                    <h1 class="stocktake-report-title"><?php echo esc_html($stocktake->post_title); ?></h1>
                     <div class="stocktake-report-meta">
-                        <span><strong>Date:</strong> <?php echo esc_html($stocktake_date); ?></span>
-                        <span><strong>Stocktake Status:</strong> <?php echo esc_html($status); ?></span>
-                        <span><strong>Audit Status:</strong> <?php echo esc_html($audit_status); ?></span>
+                        <span>StockTake Date: <?php echo esc_html($stocktake_date); ?></span>
+                        <span>Stocktake Status: <?php echo esc_html($status); ?></span>
+                        <span>Audit Status: <?php echo esc_html($audit_status); ?></span>
                     </div>
-                </div>
-
-                <div class="stocktake-report-menu">
-                    <ul>
-                        <li><a href="#summary" class="active">Summary</a></li>
-                        <li><a href="#discrepancies">Discrepancies</a></li>
-                    </ul>
                 </div>
 
                 <div class="stocktake-report-content">
-                    <div id="summary" class="stocktake-report-summary">
-                        <h2>Summary</h2>
-                        <div class="summary-grid">
-                            <div class="summary-card">
-                                <h3>Total Expected</h3>
-                                <p><?php echo esc_html($total_expected); ?></p>
-                            </div>
-                            <div class="summary-card">
-                                <h3>Total Counted</h3>
-                                <p><?php echo esc_html($total_counted); ?></p>
-                            </div>
-                            <div class="summary-card">
-                                <h3>Total Value</h3>
-                                <p><?php echo wc_price($total_value); ?></p>
-                            </div>
-                            <div class="summary-card">
-                                <h3>SKUs with Discrepancies</h3>
-                                <p><?php echo esc_html($sku_count_with_discrepancies); ?></p>
-                            </div>
-                        </div>
+                    <div class="stocktake-report-section">
+                        <h2>Stocktake Overview</h2>
+                        <table class="widefat striped">
+                            <tr>
+                                <th>Total Expected Value</th>
+                                <td><?php echo wc_price($total_expected_value); ?></td>
+                            </tr>
+                            <tr>
+                                <th>Total Counted Value</th>
+                                <td><?php echo wc_price($total_counted_value); ?></td>
+                            </tr>
+                            <tr>
+                                <th>Value Discrepancy</th>
+                                <td><?php echo wc_price($total_expected_value - $total_counted_value); ?></td>
+                            </tr>
+                            <tr>
+                                <th>Discrepancy Percentage</th>
+                                <td><?php echo number_format(($total_expected_value - $total_counted_value) / $total_expected_value * 100, 2); ?>%</td>
+                            </tr>
+                            <tr>
+                                <th>Total Products</th>
+                                <td><?php echo esc_html($total_products); ?></td>
+                            </tr>
+                            <tr>
+                                <th>Products with Discrepancies</th>
+                                <td><?php echo esc_html($products_with_discrepancies); ?></td>
+                            </tr>
+                            <tr>
+                                <th>Accuracy Rate</th>
+                                <td><?php echo number_format(($total_products - $products_with_discrepancies) / $total_products * 100, 2); ?>%</td>
+                            </tr>
+                            <tr>
+                                <th>Average Discrepancy per Product</th>
+                                <td><?php echo wc_price(($total_expected_value - $total_counted_value) / $total_products); ?></td>
+                            </tr>
+                        </table>
                     </div>
 
-                    <div id="discrepancies" class="stocktake-report-discrepancies">
-                        <h2>Discrepancies</h2>
-                        <table class="widefat striped">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>SKU</th>
-                                    <th>Expected</th>
-                                    <th>Counted</th>
-                                    <th>Discrepancy</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($discrepancies as $product_id => $data) : 
-                                    $product = wc_get_product($product_id);
-                                    if (!$product) continue;
-                                    ?>
-                                    <tr>
-                                        <td><?php echo esc_html($product->get_name()); ?></td>
-                                        <td><?php echo esc_html($product->get_sku()); ?></td>
-                                        <td><?php echo esc_html($data['expected']); ?></td>
-                                        <td><?php echo esc_html($data['counted']); ?></td>
-                                        <td><?php echo esc_html($data['discrepancy']); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                    <div class="stocktake-report-section">
+                        <h2>Discrepancy Summary</h2>
+                        <?php $this->display_discrepancy_summary($discrepancies); ?>
+                    </div>
+
+                    <div class="stocktake-report-section">
+                        <h2>Products with Discrepancies</h2>
+                        <?php $this->display_products_with_discrepancies($discrepancies); ?>
                     </div>
                 </div>
 
                 <div class="stocktake-report-actions">
-                    <a href="<?php echo esc_url(admin_url('admin.php?page=wc-stocktaking-reports')); ?>" class="button">Back to Reports</a>
-                    <button id="print-report" class="button">Print Report</button>
-                    <button id="export-csv" class="button">Export to CSV</button>
-                    <a href="<?php echo esc_url(admin_url('admin.php?page=wc-stocktaking-audit&stocktake_id=' . $stocktake_id)); ?>" class="button button-primary">Go to Audit</a>
+                    <a href="<?php echo admin_url('admin.php?page=wc-stocktaking-reports'); ?>" class="button">Back to Reports</a>
+                    <a href="<?php echo admin_url('admin.php?page=wc-stocktaking-audit&stocktake_id=' . $stocktake_id); ?>" class="button button-primary">Open Audit</a>
+                    <?php if ($status === 'Open') : ?>
+                        <a href="<?php echo admin_url('admin.php?page=wc-stocktaking-close&stocktake_id=' . $stocktake_id); ?>" class="button button-secondary">Close Stocktake</a>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php
@@ -274,8 +268,7 @@ if (!class_exists('Superwp_Woo_Stocktake_Reports')) :
             }
 
             ?>
-            <h2>Discrepancy Summary</h2>
-            <table class="stocktake-report-table">
+            <table class="widefat striped">
                 <tr>
                     <th>Total Products</th>
                     <td><?php echo esc_html($total_products); ?></td>
@@ -300,116 +293,41 @@ if (!class_exists('Superwp_Woo_Stocktake_Reports')) :
             <?php
         }
 
-        private function display_discrepancy_details($discrepancies) {
-            // Remove the entire table and loop structure
-            // Instead, you might want to add a comment explaining why this section is empty
-            // or call the method that correctly handles this functionality
-            
-            // For example:
-            // $this->display_working_discrepancy_details($discrepancies);
-            
-            // Or simply leave a comment:
-            // Discrepancy details are handled in another section of the report
-        }
-
-        private function display_discrepancy_analysis($discrepancies) {
-            $total_discrepancy = 0;
-            $positive_discrepancies = 0;
-            $negative_discrepancies = 0;
-            $reasons = [];
-
-            foreach ($discrepancies as $data) {
-                $total_discrepancy += $data['discrepancy'];
-                if ($data['discrepancy'] > 0) {
-                    $positive_discrepancies++;
-                } elseif ($data['discrepancy'] < 0) {
-                    $negative_discrepancies++;
-                }
-                if (isset($data['reason'])) {
-                    $reasons[$data['reason']] = ($reasons[$data['reason']] ?? 0) + 1;
-                }
+        private function display_products_with_discrepancies($discrepancies) {
+            if (empty($discrepancies)) {
+                echo '<p>No products with discrepancies.</p>';
+                return;
             }
-
             ?>
-            <h2>Discrepancy Analysis</h2>
-            <div class="stocktake-report-summary">
-                <div class="summary-card">
-                    <h3>Total Discrepancy</h3>
-                    <p><?php echo esc_html($total_discrepancy); ?></p>
-                </div>
-                <div class="summary-card">
-                    <h3>Positive Discrepancies</h3>
-                    <p><?php echo esc_html($positive_discrepancies); ?></p>
-                </div>
-                <div class="summary-card">
-                    <h3>Negative Discrepancies</h3>
-                    <p><?php echo esc_html($negative_discrepancies); ?></p>
-                </div>
-            </div>
-            
-            <h3>Reasons for Discrepancies</h3>
-            <ul>
-                <?php foreach ($reasons as $reason => $count) : ?>
-                    <li><?php echo esc_html($reason); ?>: <?php echo esc_html($count); ?></li>
-                <?php endforeach; ?>
-            </ul>
-            <?php
-        }
-
-        private function display_audit_section($stocktake_id) {
-            $discrepancies = get_post_meta($stocktake_id, '_stock_discrepancies', true);
-            ?>
-            <div class="audit-section">
-                <h2>Audit and Follow-up</h2>
-                <form method="post" action="">
-                    <?php wp_nonce_field('stocktake_audit_action', 'stocktake_audit_nonce'); ?>
-                    <input type="hidden" name="stocktake_id" value="<?php echo esc_attr($stocktake_id); ?>">
-                    <table class="audit-table">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Discrepancy</th>
-                                <th>Variance Type</th>
-                                <th>Initial Reason</th>
-                                <th>Follow-up Action</th>
-                                <th>Updated Reason</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($discrepancies as $product_id => $data) : 
-                                $product = wc_get_product($product_id);
-                                if (!$product) continue;
-                                $audit_data = get_post_meta($stocktake_id, "_audit_data_{$product_id}", true) ?: array();
-                                $variance_type = $data['discrepancy'] > 0 ? 'Positive Variance' : 'Negative Variance';
-                                ?>
-                                <tr>
-                                    <td><?php echo esc_html($product->get_name()); ?></td>
-                                    <td class="<?php echo $data['discrepancy'] > 0 ? 'discrepancy-positive' : ($data['discrepancy'] < 0 ? 'discrepancy-negative' : ''); ?>">
-                                        <?php echo esc_html($data['discrepancy']); ?>
-                                    </td>
-                                    <td><?php echo esc_html($variance_type); ?></td>
-                                    <td><?php echo esc_html($data['reason'] ?? 'Unknown'); ?></td>
-                                    <td>
-                                        <select name="audit[<?php echo esc_attr($product_id); ?>][action]">
-                                            <option value="">Select an action</option>
-                                            <option value="Investigate" <?php selected($audit_data['action'] ?? '', 'Investigate'); ?>>Investigate</option>
-                                            <option value="Adjust Stock" <?php selected($audit_data['action'] ?? '', 'Adjust Stock'); ?>>Adjust Stock</option>
-                                            <option value="No Action" <?php selected($audit_data['action'] ?? '', 'No Action'); ?>>No Action</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="text" 
-                                               name="audit[<?php echo esc_attr($product_id); ?>][updated_reason]" 
-                                               value="<?php echo esc_attr($audit_data['updated_reason'] ?? ''); ?>" 
-                                               placeholder="Enter updated reason">
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <button type="submit" name="update_audit" class="update-audit-button">Update Audit</button>
-                </form>
-            </div>
+            <table class="widefat striped">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Expected</th>
+                        <th>Counted</th>
+                        <th>Discrepancy</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($discrepancies as $product_id => $data) :
+                        $product = wc_get_product($product_id);
+                        if (!$product) continue;
+                        ?>
+                        <tr>
+                            <td><?php echo esc_html($product->get_name()); ?></td>
+                            <td><?php echo esc_html($product->get_sku()); ?></td>
+                            <td><?php echo esc_html($data['expected']); ?></td>
+                            <td><?php echo esc_html($data['counted']); ?></td>
+                            <td class="<?php echo $data['discrepancy'] > 0 ? 'positive' : ($data['discrepancy'] < 0 ? 'negative' : ''); ?>">
+                                <?php echo esc_html($data['discrepancy']); ?>
+                            </td>
+                            <td><?php echo esc_html($data['reason'] ?? 'To Be Determined'); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
             <?php
         }
 
@@ -457,111 +375,6 @@ if (!class_exists('Superwp_Woo_Stocktake_Reports')) :
                 SUPERWPSTOCKTAKE_VERSION
             );
         }
-
-        private function display_products_without_discrepancies($products) {
-            if (empty($products)) {
-                echo '<p>No products without discrepancies.</p>';
-                return;
-            }
-            ?>
-            <table class="stocktake-report-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>SKU</th>
-                        <th>Expected Stock</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($products as $product_id => $data) : 
-                        $product = wc_get_product($product_id);
-                        if (!$product) continue; ?>
-                        <tr>
-                            <td><?php echo esc_html($product->get_name()); ?></td>
-                            <td><?php echo esc_html($product->get_sku()); ?></td>
-                            <td><?php echo esc_html($data['expected']); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-            <?php
-        }
-
-        // New method to display products with discrepancies
-        private function display_products_with_discrepancies($discrepancies) {
-            if (empty($discrepancies)) {
-                echo '<p>No products with discrepancies.</p>';
-                return;
-            }
-            ?>
-            <table class="wp-list-table widefat fixed striped stocktake-report-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>SKU</th>
-                        <th>Expected Stock</th>
-                        <th>Counted Stock</th>
-                        <th>Discrepancy</th>
-                        <th>Variance Type</th>
-                        <th>Initial Reason</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($discrepancies as $product_id => $data) :
-                        $product = wc_get_product($product_id);
-                        if (!$product) continue;
-                        $variance_type = $data['discrepancy'] > 0 ? 'Positive Variance' : ($data['discrepancy'] < 0 ? 'Negative Variance' : 'No Variance');
-                        ?>
-                        <tr>
-                            <td><?php echo esc_html($product->get_name()); ?></td>
-                            <td><?php echo esc_html($product->get_sku()); ?></td>
-                            <td><?php echo esc_html($data['expected']); ?></td>
-                            <td><?php echo esc_html($data['counted']); ?></td>
-                            <td class="<?php echo $data['discrepancy'] > 0 ? 'discrepancy-positive' : ($data['discrepancy'] < 0 ? 'discrepancy-negative' : ''); ?>">
-                                <?php echo esc_html($data['discrepancy']); ?>
-                            </td>
-                            <td><?php echo esc_html($variance_type); ?></td>
-                            <td><?php echo esc_html($data['reason'] ?? 'N/A'); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-            <?php
-        }
-
-        private function calculate_total_discrepancy($discrepancies) {
-            $total_discrepancy = 0;
-
-            foreach ($discrepancies as $data) {
-                $total_discrepancy += $data['discrepancy']; // Assuming 'discrepancy' is a key in the $data array
-            }
-
-            return $total_discrepancy;
-        }
-
-        private function count_positive_discrepancies($discrepancies) {
-            $count = 0;
-
-            foreach ($discrepancies as $data) {
-                if ($data['discrepancy'] > 0) {
-                    $count++;
-                }
-            }
-
-            return $count;
-        }
-
-        private function count_negative_discrepancies($discrepancies) {
-            $count = 0;
-
-            foreach ($discrepancies as $data) {
-                if ($data['discrepancy'] < 0) {
-                    $count++;
-                }
-            }
-
-            return $count;
-        }
     }
 
 endif;
@@ -576,3 +389,9 @@ function enqueue_stocktake_report_scripts() {
     );
 }
 add_action('admin_enqueue_scripts', 'enqueue_stocktake_report_scripts');
+
+
+
+
+
+

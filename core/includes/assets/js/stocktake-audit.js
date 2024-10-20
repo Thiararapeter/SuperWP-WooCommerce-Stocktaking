@@ -40,6 +40,43 @@ jQuery(document).ready(function($) {
         });
     });
 
+    // Updated code for category filter
+    $('#category-filter').on('change', function() {
+        var selectedCategory = $(this).val();
+        console.log('Selected category:', selectedCategory); // Debugging
+
+        if (selectedCategory) {
+            $('.product-row').each(function() {
+                var $row = $(this);
+                var rowClasses = $row.attr('class').split(/\s+/);
+                console.log('Row classes:', rowClasses); // Debugging
+                
+                if (rowClasses.includes(selectedCategory)) {
+                    $row.show();
+                } else {
+                    $row.hide();
+                }
+            });
+        } else {
+            $('.product-row').show();
+        }
+        
+        console.log('Visible rows:', $('.product-row:visible').length); // Debugging
+    });
+
+    // New code for product search
+    $('#product-search').on('input', function() {
+        var searchTerm = $(this).val().toLowerCase();
+        $('.product-row').each(function() {
+            var productName = $(this).data('product-name');
+            if (productName.indexOf(searchTerm) > -1) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+
     // Existing JavaScript for custom actions
     $('.follow-up-action').on('change', function() {
         var customActionInput = $(this).siblings('.custom-action');

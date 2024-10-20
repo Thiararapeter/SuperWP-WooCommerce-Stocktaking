@@ -71,10 +71,11 @@ if (!class_exists('Superwp_Woo_Stocktake_Wizard')) :
                         <tr>
                             <th scope="row"><label for="product-categories">Product Categories</label></th>
                             <td>
+                                <label><input type="checkbox" id="select-all-categories"> Select All</label><br>
                                 <?php
                                 $categories = get_terms('product_cat', array('hide_empty' => false));
                                 foreach ($categories as $category) {
-                                    echo '<label><input type="checkbox" name="product_categories[]" value="' . esc_attr($category->term_id) . '"> ' . esc_html($category->name) . '</label><br>';
+                                    echo '<label><input type="checkbox" name="product_categories[]" value="' . esc_attr($category->term_id) . '" class="category-checkbox"> ' . esc_html($category->name) . '</label><br>';
                                 }
                                 ?>
                             </td>
@@ -96,7 +97,12 @@ if (!class_exists('Superwp_Woo_Stocktake_Wizard')) :
                 $stocktake_name = sanitize_text_field($_POST['stocktake_name']);
                 $stocktake_date = sanitize_text_field($_POST['stocktake_date']);
                 $include_out_of_stock = isset($_POST['include_out_of_stock']) ? 1 : 0;
-                $product_categories = isset($_POST['product_categories']) ? array_map('intval', $_POST['product_categories']) : array();
+                
+                $all_categories = get_terms('product_cat', array('fields' => 'ids', 'hide_empty' => false));
+                $selected_categories = isset($_POST['product_categories']) ? array_map('intval', $_POST['product_categories']) : array();
+                
+                // If all categories are selected, store an empty array to represent "all categories"
+                $product_categories = (count($selected_categories) === count($all_categories)) ? array() : $selected_categories;
 
                 $stocktake_id = wp_insert_post(array(
                     'post_title'    => $stocktake_name,

@@ -12,7 +12,9 @@ jQuery(document).ready(function($) {
         });
 
         $('.current-stock-value').each(function() {
-            totalCurrentStockValue += parseFloat($(this).text().replace(/[^0-9.-]+/g,"")) || 0;
+            var value = parseFloat($(this).text().replace(/[^0-9.-]+/g,"")) || 0;
+            totalCurrentStockValue += value;
+            console.log("Current Stock Value: ", value); // Debugging line
         });
 
         $('.counted').each(function() {
@@ -20,7 +22,9 @@ jQuery(document).ready(function($) {
         });
 
         $('.counted-value').each(function() {
-            totalCountedValue += parseFloat($(this).text().replace(/[^0-9.-]+/g,"")) || 0;
+            var value = parseFloat($(this).text().replace(/[^0-9.-]+/g,"")) || 0;
+            totalCountedValue += value;
+            console.log("Counted Value: ", value); // Debugging line
         });
 
         $('#total-products').text(totalProducts);
@@ -76,13 +80,6 @@ jQuery(document).ready(function($) {
         var $input = $(this);
         var productId = $input.data('product-id');
         var newCount = parseInt($input.val());
-        var $reason = $('#reason_' + productId);
-
-        if (isNaN(newCount)) {
-            showError('Please enter a valid number');
-            $input.val(0);
-            return;
-        }
 
         showLoading();
         $.ajax({
@@ -92,14 +89,13 @@ jQuery(document).ready(function($) {
                 action: 'wc_stocktaking_update_count',
                 security: wc_stocktaking_ajax.nonce,
                 product_id: productId,
-                new_count: newCount,
-                reason: $reason.val()
+                new_count: newCount
             },
             success: function(response) {
                 hideLoading();
                 if (response.success) {
                     $('#counted_' + productId).text(response.data.new_count);
-                    $('#discrepancy_' + productId).text(response.data.discrepancy);
+                    $('#counted_value_' + productId).html(response.data.total_count_value);
                     showSuccess('Count updated successfully');
                 } else {
                     showError(response.data.message);
@@ -114,41 +110,27 @@ jQuery(document).ready(function($) {
 
     $('#save-count').on('click', function(e) {
         e.preventDefault();
-        var newCounts = {};
-        $('.new-count').each(function() {
-            var productId = $(this).data('product-id');
-            var count = $(this).val();
-            if (count !== '0') {
-                newCounts[productId] = count;
-            }
-        });
+        
+        var stocktakeId = $('#stocktake-id').val();
+        var newCounts = {}; // Collect new counts here
 
-        showLoading();
+        // Add logic to populate newCounts
+
         $.ajax({
             url: wc_stocktaking_ajax.ajax_url,
-            type: 'POST',
+            method: 'POST',
             data: {
                 action: 'wc_stocktaking_save_count',
                 security: wc_stocktaking_ajax.nonce,
+                stocktake_id: stocktakeId,
                 new_counts: newCounts
             },
             success: function(response) {
-                hideLoading();
                 if (response.success) {
-                    $('#stocktaking-messages').html('<div class="updated"><p>' + response.data.message + '</p></div>');
-                    // Update the displayed counts
-                    for (var productId in newCounts) {
-                        var currentCount = parseInt($('#counted_' + productId).text()) || 0;
-                        var newTotal = currentCount + parseInt(newCounts[productId]);
-                        $('#counted_' + productId).text(newTotal);
-                    }
+                    alert(response.data.message);
                 } else {
-                    $('#stocktaking-messages').html('<div class="error"><p>' + response.data.message + '</p></div>');
+                    alert(response.data.message);
                 }
-            },
-            error: function() {
-                hideLoading();
-                $('#stocktaking-messages').html('<div class="error"><p>An error occurred while saving the count.</p></div>');
             }
         });
     });
@@ -180,10 +162,7 @@ jQuery(document).ready(function($) {
 
     // Function to show error messages
     function showError(message) {
-        $('#stocktaking-messages').html('<div class="notice notice-error"><p>' + message + '</p></div>');
-        setTimeout(function() {
-            $('#stocktaking-messages').empty();
-        }, 5000);
+        alert(message); // Replace with your error display logic
     }
 
     // Function to show success messages
@@ -192,5 +171,77 @@ jQuery(document).ready(function($) {
         setTimeout(function() {
             $('#stocktaking-messages').empty();
         }, 5000);
+    }
+
+    $('#select-all-categories').change(function() {
+        $('.category-checkbox').prop('checked', this.checked);
+    });
+
+    $('.category-checkbox').change(function() {
+        if (!this.checked) {
+            $('#select-all-categories').prop('checked', false);
+        } else if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
+            $('#select-all-categories').prop('checked', true);
+        }
+    });
+
+    // Handle new count input
+    $('.new-count').on('focus', function() {
+        $(this).select(); // Highlight the text for easy replacement
+    });
+
+    $('.new-count').on('change', function() {
+        var $input = $(this);
+        var productId = $input.data('product-id');
+        var newCount = parseInt($input.val());
+
+        if (isNaN(newCount)) {
+            showError('Please enter a valid number');
+            $input.val(0);
+            return;
+        }
+
+        var currentCounted = parseInt($('#counted_' + productId).text());
+        var updatedCounted = currentCounted + newCount;
+
+        if (updatedCounted < 0) {
+            showError('Count cannot be negative');
+            $input.val(0);
+            return;
+        }
+
+        showLoading();
+        $.ajax({
+            url: wc_stocktaking_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'wc_stocktaking_update_count',
+                security: wc_stocktaking_ajax.nonce,
+                product_id: productId,
+                new_count: updatedCounted
+            },
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    $('#counted_' + productId).text(updatedCounted);
+                    $('#counted_value_' + productId).html(response.data.total_count_value);
+                    $('#last_update_' + productId).text(response.data.last_update_time);
+                    showSuccess('Count updated successfully. Total counted: ' + updatedCounted);
+                } else {
+                    showError(response.data.message);
+                }
+                // Reset the new count input to 0 without affecting the counted value
+                $input.val('').attr('placeholder', '0');
+            },
+            error: function() {
+                hideLoading();
+                showError('An error occurred while updating the count');
+            }
+        });
+    });
+
+    // Function to format price
+    function wc_price(amount) {
+        return 'KSh ' + amount.toFixed(2); // Adjust currency symbol and format as needed
     }
 });
